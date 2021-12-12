@@ -26,7 +26,7 @@ pub struct EntryWithPayload<'a, 'b> {
 }
 
 #[Object]
-/// A bamboo entry and it's payload
+/// A bamboo entry and its payload
 impl<'a, 'b> EntryWithPayload<'a, 'b> {
     pub async fn entry(&self) -> &[u8] {
         &self.entry
