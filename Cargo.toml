@@ -1,0 +1,14 @@
+[package]
+name = "p2panda-gql-replication"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+async-graphql = "3.0.11"
+async-graphql-tide = "3.0.7"
+async-std = "1.10.0"
+bytes = "1.1.0"
+futures = "0.3.18"
+tide = "0.16.0"
