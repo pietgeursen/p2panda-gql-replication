@@ -11,4 +11,6 @@ async-graphql-tide = "3.0.7"
 async-std = "1.10.0"
 bytes = "1.1.0"
 futures = "0.3.18"
+lru = "0.7.0"
+serde = {version = "1", features = ["derive"]}
 tide = "0.16.0"
