@@ -1,5 +1,5 @@
-use async_graphql::{Object, Schema, EmptyMutation, EmptySubscription };
 use async_graphql::*;
+use async_graphql::{EmptyMutation, EmptySubscription, Object, Schema};
 
 pub mod aliased_author;
 pub mod bamboo_entry;

@@ -1,5 +1,5 @@
 use async_graphql::*;
-use base64::{encode, decode};
+use base64::{decode, encode};
 
 pub struct PublicKey(Vec<u8>);
 
@@ -18,5 +18,3 @@ impl ScalarType for PublicKey {
         Value::String(encode(&self.0))
     }
 }
-
-

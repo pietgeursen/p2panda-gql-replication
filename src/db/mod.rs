@@ -1,5 +1,2 @@
-
 #[derive(Default)]
-pub struct ReplicationDb{
-
-}
+pub struct ReplicationDb {}

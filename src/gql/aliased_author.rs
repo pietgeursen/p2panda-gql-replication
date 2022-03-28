@@ -1,5 +1,5 @@
-use async_graphql::*;
 use super::public_key::PublicKey;
+use async_graphql::*;
 
 #[derive(InputObject, SimpleObject)]
 pub struct AliasedAuthor {
