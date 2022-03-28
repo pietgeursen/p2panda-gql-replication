@@ -1,4 +1,7 @@
+use async_graphql::{Data, Request, Variables};
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
+use log::trace;
+use std::collections::HashMap;
 use std::net::Ipv4Addr;
 use std::net::SocketAddr;
 //use tide::{http::mime, Body, Response, StatusCode};
@@ -22,9 +25,41 @@ async fn main() -> Result<()> {
         .finish();
 
     let peers = vec![SocketAddr::from((Ipv4Addr::LOCALHOST, 8099))];
-    let (server, _endpoint) = Qp2pServer::new(peers, schema, None)
+    let (server, endpoint) = Qp2pServer::new(peers, schema, None)
         .await
         .expect("server failed to start");
+
+    tokio::spawn(async move {
+        let (conn, mut incoming) = endpoint
+            .connect_to(&SocketAddr::from((Ipv4Addr::LOCALHOST, 8099)))
+            .await
+            .unwrap();
+
+        let query = "{
+            entryByHash(hash: \"notahash\"){
+                entry
+            }
+        }
+        "
+        .to_owned();
+
+        let req = Request {
+            query,
+            operation_name: None,
+            variables: Variables::default(),
+            uploads: Vec::new(),
+            data: Data::default(),
+            extensions: HashMap::default(),
+            disable_introspection: true,
+        };
+
+        conn.send(serde_json::to_vec(&req).unwrap().into())
+            .await
+            .expect("to be able to send request");
+        let response = incoming.next().await;
+        trace!("response: {:?}", response);
+    });
+
     server
         .serve()
         .await

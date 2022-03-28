@@ -29,9 +29,9 @@ impl QueryRoot {
     async fn entry_by_hash<'a>(
         &self,
         _ctx: &Context<'a>,
-        _hash: EntryHash,
+        hash: EntryHash,
     ) -> Result<Option<EntryAndPayload>> {
-        todo!()
+        Ok(None)
     }
     async fn entry_by_log_id_and_sequence<'a>(
         &self,
@@ -47,6 +47,6 @@ impl QueryRoot {
         _ctx: &Context<'a>,
         _public_keys: Vec<PublicKey>,
     ) -> Result<Vec<AliasedAuthor>> {
-        todo!()
+        Ok(Vec::new())
     }
 }
