@@ -1,42 +1,34 @@
-use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
-use async_std::task;
-use std::env;
-use tide::{http::mime, Body, Response, StatusCode};
+use std::net::Ipv4Addr;
+use std::net::SocketAddr;
+//use tide::{http::mime, Body, Response, StatusCode};
 
+mod db;
 mod gql;
+mod qp2p_server;
 
-use gql::{Replication, QueryRoot, MutationRoot};
+use db::ReplicationDb;
+use gql::QueryRoot;
+use qp2p_server::Qp2pServer;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-fn main() -> Result<()> {
-    task::block_on(run())
-}
+#[tokio::main]
+async fn main() -> Result<()> {
+    pretty_env_logger::init();
 
-async fn run() -> Result<()> {
-    let listen_addr = env::var("LISTEN_ADDR").unwrap_or_else(|_| "localhost:8000".to_owned());
-
-    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-        .data(Replication::default())
+    let schema = Schema::build(QueryRoot, EmptyMutation, EmptySubscription)
+        .data(ReplicationDb::default())
         .finish();
 
-    println!("Playground: http://{}", listen_addr);
-
-    let mut app = tide::new();
-
-    app.at("/graphql").post(async_graphql_tide::graphql(schema));
-
-    app.at("/").get(|_| async move {
-        let mut resp = Response::new(StatusCode::Ok);
-        resp.set_body(Body::from_string(playground_source(
-            GraphQLPlaygroundConfig::new("/graphql"),
-        )));
-        resp.set_content_type(mime::HTML);
-        Ok(resp)
-    });
-
-    app.listen(listen_addr).await?;
+    let peers = vec![SocketAddr::from((Ipv4Addr::LOCALHOST, 8099))];
+    let (server, _endpoint) = Qp2pServer::new(peers, schema, None)
+        .await
+        .expect("server failed to start");
+    server
+        .serve()
+        .await
+        .expect("expected serve to complete cleanly");
 
     Ok(())
 }

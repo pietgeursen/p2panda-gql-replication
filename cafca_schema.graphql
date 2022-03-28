@@ -1,0 +1,117 @@
+type Query {
+    # Retrieve individual entries either by hash, or by a author, log id, sequence number
+    entry(
+        spec: [String | EntrySpec],
+    ): [EntryWithPayload]
+
+    # Retrieve a collection of entries filtered by author, range and/or schema
+    allEntries(
+        author: [AuthorRangeSpec],
+        schema: [String],
+    ): [Author]
+}
+
+# Parameters
+
+type AuthorSpec = PublicKey | Alias
+type PublicKey = String
+type Alias = Int
+
+type EntrySpec {
+    author: AuthorSpec!, 
+    logId: Int!
+    sequenceNumber: Int!, 
+}
+
+type AuthorRangeSpec {
+    author: AuthorSpec!,
+    range: {
+        logId: Int!,
+        start: Int, 
+        end: Int
+    }
+}
+
+# Return values
+
+type Author {
+    alias: Int,
+    publicKey: String,
+    logs: [Log]
+}
+
+type Log {
+    id: Int,
+    schema: String,
+    entries: [EntryBundle]
+}
+
+type EntryBundle {
+    hash: String,
+    sequenceNumber: Int,
+    entry: String,
+    payload: String,
+}
+
+
+# Example: Request a single entry by author, log and sequence
+# Returns hash and payload
+
+{
+    entry(spec: [{
+        author: "ABC",
+        logId: 1,
+        sequenceNumber: 5
+    }]) {
+        hash,
+        payload
+    }
+}
+
+# Example: Request two collections of entries defined by author, log and a 
+# range of sequence numbers.
+
+{
+    allEntries(author: [{
+        author: "ABC",
+        range: {
+            logId: 1,
+            start: 1,
+            end: 5
+        }
+    }, {
+        author: "DEF",
+        range: {
+            logId: 437824,
+            start: 323,
+            end: 324
+        }
+    }]) {
+        author {
+            logs {
+                id,
+                schema,
+                entries {
+                    entry,
+                    payload,
+                    sequenceNumber
+                }
+            }
+        }
+    }
+}
+
+# Example: Request all entries of all logs published by the requested author 
+#(shoudl definitely have pagination lol)
+
+{
+    allEntries(author: [5]) {
+        author {
+            logs {
+                entries {
+                    entry,
+                }
+            }
+        }
+    }
+}
