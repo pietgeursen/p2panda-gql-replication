@@ -69,20 +69,14 @@ impl Qp2pServer {
                         trace!("received bytes: {:?}", bytes);
                         match serde_json::from_slice::<Request>(&bytes) {
                             Ok(request) => {
-                                self.schema
-                                    .execute(request)
-                                    .then({
-                                        let connection = connection.clone();
-                                        |response: Response| async move {
-                                            let bytes = serde_json::to_vec(&response)
-                                                .expect("to be able to serialize response");
-                                            connection.send(bytes.into()).await
-                                        }
-                                    })
-                                    .unwrap_or_else(|err| {
-                                        warn!("couldn't send response: {:?}", err);
-                                    })
-                                    .await;
+                                let response = self.schema.execute(request).await;
+
+                                let bytes = serde_json::to_vec(&response)
+                                    .expect("to be able to serialize response");
+
+                                connection.send(bytes.into()).await.unwrap_or_else(|err| {
+                                    warn!("couldn't send response: {:?}", err);
+                                });
                             }
                             Err(err) => {
                                 error!("err, couldn't deserialize request. Err: {:?}", err);
