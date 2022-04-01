@@ -22,6 +22,8 @@ pub use sequence_number::SequenceNumber;
 
 pub type SchemaType = Schema<QueryRoot, EmptyMutation, EmptySubscription>;
 
+pub mod client;
+
 pub struct QueryRoot;
 
 #[Object]

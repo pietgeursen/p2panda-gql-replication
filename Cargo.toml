@@ -3,13 +3,20 @@ name = "p2panda-gql-replication"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "qp2p"
+
+[[bin]]
+name = "dump_schema"
+
 [dependencies]
 async-graphql = "3.0.34"
 arrayvec = "0.5.2"
 base64 = "0.13"
-bamboo-rs-core-ed25519-yasmf = "0.1.0"
+bamboo-rs-core-ed25519-yasmf = "0.1.1"
 bytes = "1.1.0"
 futures = "0.3.21"
+graphql_client = "0.10"
 log = "0.4"
 lru = "0.7.0"
 pretty_env_logger = "0.4.0"

@@ -1,18 +1,14 @@
 use async_graphql::{Data, Request, Variables};
 use async_graphql::{EmptyMutation, EmptySubscription, Schema};
 use log::trace;
+use p2panda_gql_replication::gql::EntryHash;
 use std::collections::HashMap;
 use std::net::Ipv4Addr;
 use std::net::SocketAddr;
+use p2panda_gql_replication::*;
+use p2panda_gql_replication::gql::client::{GetEntryByHash, get_entry_by_hash};
+use graphql_client::GraphQLQuery;
 //use tide::{http::mime, Body, Response, StatusCode};
-
-mod db;
-mod gql;
-mod qp2p_server;
-
-use db::ReplicationDb;
-use gql::QueryRoot;
-use qp2p_server::Qp2pServer;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
@@ -35,18 +31,27 @@ async fn main() -> Result<()> {
             .await
             .unwrap();
 
-        let query = "{
-            entryByHash(hash: \"notahash\"){
-                entry
-            }
-        }
-        "
-        .to_owned();
+        let hash = EntryHash(vec![1,2,3]);
+        let variables = get_entry_by_hash::Variables{ hash: Some(hash) };
+        let query = GetEntryByHash::build_query(variables);
+        //variables.
+
+        //let query = "{
+        //    entryByHash(hash: \"notahash\"){
+        //        entry
+        //    }
+        //}
+        //"
+        //.to_owned();
+
+        let var_vec = serde_json::to_vec(&query.variables).unwrap();
+        let variables: serde_json::Value = serde_json::from_slice(&var_vec).unwrap();
+        let variables = async_graphql::Variables::from_json(variables);
 
         let req = Request {
-            query,
+            query: query.query.to_owned(),
             operation_name: None,
-            variables: Variables::default(),
+            variables,
             uploads: Vec::new(),
             data: Data::default(),
             extensions: HashMap::default(),
